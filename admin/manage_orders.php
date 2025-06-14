@@ -538,10 +538,12 @@ $orders = $conn->query("
                 <h3 id="orderDetailsTitle">Order Details</h3>
                 <button class="close" onclick="closeModal('orderDetailsModal')">&times;</button>
             </div>
-            <div id="orderDetailsContent">
-                <div class="loading-spinner" style="text-align: center; padding: 2rem;">
-                    <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: #f5c542;"></i>
-                    <p style="margin-top: 1rem; color: #6b7280;">Loading order details...</p>
+            <div class="modal-body">
+                <div id="orderDetailsContent">
+                    <div class="loading-spinner" style="text-align: center; padding: 2rem;">
+                        <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: #f5c542;"></i>
+                        <p style="margin-top: 1rem; color: #6b7280;">Loading order details...</p>
+                    </div>
                 </div>
             </div>
         </div>

@@ -703,7 +703,8 @@ $users_result = $users_stmt->get_result();
                 <h3>Change User Role</h3>
                 <button class="close" onclick="closeModal('roleModal')">&times;</button>
             </div>
-            <form method="POST" id="roleForm">
+            <div class="modal-body">
+                <form method="POST" id="roleForm">
                 <input type="hidden" name="action" value="update_role">
                 <input type="hidden" name="user_id" id="roleUserId">
                 
@@ -720,11 +721,12 @@ $users_result = $users_stmt->get_result();
                     </select>
                 </div>
                 
-                <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem;">
-                    <button type="button" class="btn btn-outline" onclick="closeModal('roleModal')">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Update Role</button>
-                </div>
-            </form>
+                    <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem;">
+                        <button type="button" class="btn btn-outline" onclick="closeModal('roleModal')">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Update Role</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -735,17 +737,19 @@ $users_result = $users_stmt->get_result();
                 <h3>Confirm Deletion</h3>
                 <button class="close" onclick="closeModal('deleteModal')">&times;</button>
             </div>
-            <p>Are you sure you want to delete user <strong id="deleteUsername"></strong>? This action cannot be undone.</p>
-            
-            <form method="POST" id="deleteForm">
+            <div class="modal-body">
+                <p>Are you sure you want to delete user <strong id="deleteUsername"></strong>? This action cannot be undone.</p>
+                
+                <form method="POST" id="deleteForm">
                 <input type="hidden" name="action" value="delete_user">
                 <input type="hidden" name="user_id" id="deleteUserId">
                 
-                <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem;">
-                    <button type="button" class="btn btn-outline" onclick="closeModal('deleteModal')">Cancel</button>
-                    <button type="submit" class="btn btn-danger">Delete User</button>
-                </div>
-            </form>
+                    <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem;">
+                        <button type="button" class="btn btn-outline" onclick="closeModal('deleteModal')">Cancel</button>
+                        <button type="submit" class="btn btn-danger">Delete User</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 

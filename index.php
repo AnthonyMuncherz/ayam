@@ -9,6 +9,16 @@ session_start([
     'cookie_samesite' => 'Strict'
 ]);
 
+// Include database connection
+require_once 'db_connection.php';
+
+// Check if database connection was successful
+if (!isset($conn) || $conn->connect_error) {
+    error_log("Database connection failed: " . ($conn->connect_error ?? 'Connection variable not set'));
+    // Continue without database functionality for the homepage
+    $conn = null;
+}
+
 // Security headers
 header('X-Content-Type-Options: nosniff');
 header('X-Frame-Options: DENY');
@@ -17,20 +27,26 @@ header('Referrer-Policy: strict-origin-when-cross-origin');
 header('Content-Security-Policy: default-src \'self\'; script-src \'self\' \'unsafe-inline\'; style-src \'self\' \'unsafe-inline\'; img-src \'self\' data:; font-src \'self\';');
 
 // Check if user is already logged in
-if (isset($_SESSION['user_id'])) {
+if (isset($_SESSION['user_id']) && $conn !== null) {
     // Check user role and redirect accordingly
-    $stmt = $conn->prepare("SELECT role FROM users WHERE id = ?");
-    $stmt->bind_param("i", $_SESSION['user_id']);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $user = $result->fetch_assoc();
-    
-    if ($user && $user['role'] === 'admin') {
-        header('Location: admin/index.php');
-    } else {
-        header('Location: deliverypickup.php');
+    try {
+        $stmt = $conn->prepare("SELECT role FROM users WHERE id = ?");
+        $stmt->bind_param("i", $_SESSION['user_id']);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $user = $result->fetch_assoc();
+        
+        if ($user && $user['role'] === 'admin') {
+            header('Location: admin/index.php');
+            exit();
+        } else {
+            header('Location: deliverypickup.php');
+            exit();
+        }
+    } catch (Exception $e) {
+        error_log("Database query failed: " . $e->getMessage());
+        // Continue to show homepage if database query fails
     }
-    exit();
 }
 ?>
 <!DOCTYPE html>

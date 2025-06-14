@@ -572,7 +572,8 @@ $menu_items = $conn->query("SELECT * FROM menu_items ORDER BY type, name");
                 <h3>Add New Menu Item</h3>
                 <button class="close" onclick="closeModal('addModal')">&times;</button>
             </div>
-            <form method="POST" enctype="multipart/form-data">
+            <div class="modal-body">
+                <form method="POST" enctype="multipart/form-data">
                 <input type="hidden" name="action" value="add_item">
                 
                 <div class="form-group">
@@ -627,11 +628,12 @@ $menu_items = $conn->query("SELECT * FROM menu_items ORDER BY type, name");
                     </label>
                 </div>
                 
-                <div class="actions">
-                    <button type="button" class="btn btn-outline" onclick="closeModal('addModal')">Cancel</button>
-                    <button type="submit" class="btn btn-success">Add Item</button>
-                </div>
-            </form>
+                    <div class="actions">
+                        <button type="button" class="btn btn-outline" onclick="closeModal('addModal')">Cancel</button>
+                        <button type="submit" class="btn btn-success">Add Item</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -642,7 +644,8 @@ $menu_items = $conn->query("SELECT * FROM menu_items ORDER BY type, name");
                 <h3>Edit Menu Item</h3>
                 <button class="close" onclick="closeModal('editModal')">&times;</button>
             </div>
-            <form method="POST" enctype="multipart/form-data">
+            <div class="modal-body">
+                <form method="POST" enctype="multipart/form-data">
                 <input type="hidden" name="action" value="update_item">
                 <input type="hidden" id="edit_id" name="id">
                 
@@ -708,11 +711,12 @@ $menu_items = $conn->query("SELECT * FROM menu_items ORDER BY type, name");
                     </label>
                 </div>
                 
-                <div class="actions">
-                    <button type="button" class="btn btn-outline" onclick="closeModal('editModal')">Cancel</button>
-                    <button type="submit" class="btn btn-success">Update Item</button>
-                </div>
-            </form>
+                    <div class="actions">
+                        <button type="button" class="btn btn-outline" onclick="closeModal('editModal')">Cancel</button>
+                        <button type="submit" class="btn btn-success">Update Item</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 

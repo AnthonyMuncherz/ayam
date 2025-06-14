@@ -71,6 +71,11 @@
    - Consistent components (buttons, cards, tables, modals)
    - Modern color scheme and typography
    - **Added**: Image upload styling and components
+   - **Fixed**: Modal scrolling and viewport constraints
+     - Modals now have proper height limits (max-height: calc(100vh - 4rem))
+     - Scrollable modal body with custom scrollbar styling
+     - Responsive modal sizing for mobile devices
+     - Proper flex layout structure for better content management
 
 3. **images/uploads/** - Directory for uploaded menu item images
    - Secure file storage with proper permissions
