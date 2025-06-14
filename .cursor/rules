@@ -10,6 +10,20 @@
 - **Location**: Kuala Lumpur, Malaysia
 
 ## Recent Updates (Latest Session)
+### Menu.php Database Integration (Current Update)
+- **Dynamic Menu Loading**: Updated `menu.php` to fetch menu items from database instead of hardcoded arrays
+- **Database Integration**: 
+  - Added database connection via `require_once 'db_connection.php'`
+  - Fetches food items from `menu_items` table where `type = 'food'`
+  - Fetches drink items from `menu_items` table where `type = 'drink'`
+  - Proper error handling with fallback to hardcoded items if database fails
+- **Security Enhancements**:
+  - HTML escaping with `htmlspecialchars()` for all user-facing data
+  - Image error handling with fallback to `images/placeholder.svg`
+  - Exception handling with error logging
+- **Data Structure**: Uses database columns (id, name, image_path, price, is_set_meal, type)
+- **Backward Compatibility**: Maintains same form structure for cart.php integration
+
 ### Currency & Context Changes
 - **Currency**: Changed from Indonesian Rupiah (Rp) to Malaysian Ringgit (RM)
 - **Number Format**: Updated to Malaysian format (2 decimal places: RM 25.50)

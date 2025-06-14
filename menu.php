@@ -1,4 +1,49 @@
-<?php session_start(); ?>
+<?php 
+session_start(); 
+require_once 'db_connection.php';
+
+// Fetch menu items from database
+$foodItems = [];
+$drinkItems = [];
+
+try {
+    if ($conn) {
+        // Fetch food items
+        $foodQuery = "SELECT * FROM menu_items WHERE type = 'food' ORDER BY name";
+        $foodResult = $conn->query($foodQuery);
+        if ($foodResult) {
+            while ($row = $foodResult->fetch_assoc()) {
+                $foodItems[] = $row;
+            }
+        }
+        
+        // Fetch drink items
+        $drinkQuery = "SELECT * FROM menu_items WHERE type = 'drink' ORDER BY name";
+        $drinkResult = $conn->query($drinkQuery);
+        if ($drinkResult) {
+            while ($row = $drinkResult->fetch_assoc()) {
+                $drinkItems[] = $row;
+            }
+        }
+    }
+} catch (Exception $e) {
+    error_log("Database error in menu.php: " . $e->getMessage());
+    // Fallback to hardcoded items if database fails
+    $foodItems = [
+        ["id" => 1, "name" => "Ayam Gepuk Ori", "image_path" => "images/ayamgepukori.webp", "price" => 15.00, "is_set_meal" => 0],
+        ["id" => 2, "name" => "Ayam Gepuk Crispy", "image_path" => "images/ayamgepukcrispy.jpg", "price" => 17.00, "is_set_meal" => 0],
+        ["id" => 3, "name" => "Ayam Gepuk Ori Set", "image_path" => "images/ayamgepukoriset.jpg", "price" => 20.00, "is_set_meal" => 1],
+        ["id" => 4, "name" => "Ayam Gepuk Crispy Set", "image_path" => "images/ayamgepukcrispyset.jpg", "price" => 22.00, "is_set_meal" => 1]
+    ];
+    $drinkItems = [
+        ["id" => 5, "name" => "Honeydew Latte", "image_path" => "images/HoneydewLatte.webp", "price" => 5.00],
+        ["id" => 6, "name" => "Iced Lemon Tea", "image_path" => "images/icelemontea.webp", "price" => 4.00],
+        ["id" => 7, "name" => "Orange Fizz", "image_path" => "images/orangefizz.png", "price" => 6.00],
+        ["id" => 8, "name" => "Bali Blue", "image_path" => "images/baliblue.png", "price" => 7.00],
+        ["id" => 9, "name" => "Green Java", "image_path" => "images/greenjava.jpg", "price" => 6.50]
+    ];
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -80,35 +125,33 @@
         <h3>Select Your Food</h3>
         <div class="menu-grid">
             <?php
-            $menuItems = [
-                ["Ayam Gepuk Ori", "images/ayamgepukori.webp", 15.00, false],
-                ["Ayam Gepuk Crispy", "images/ayamgepukcrispy.jpg", 17.00, false],
-                ["Ayam Gepuk Ori Set", "images/ayamgepukoriset.jpg", 20.00, true],
-                ["Ayam Gepuk Crispy Set", "images/ayamgepukcrispyset.jpg", 22.00, true]
-            ];
-
-            foreach ($menuItems as $item) {
-                $isSetMeal = $item[3] ? "set-meal" : "";
+            foreach ($foodItems as $item) {
+                $isSetMeal = $item['is_set_meal'] ? "set-meal" : "";
+                $itemName = htmlspecialchars($item['name']);
+                $itemPrice = number_format($item['price'], 2);
+                $imagePath = htmlspecialchars($item['image_path']);
+                
                 echo "<div class='menu-item'>
                         <label>
-                            <img src='{$item[1]}' alt='{$item[0]}'><br>
-                            <input type='checkbox' name='food[]' value='{$item[0]}|{$item[2]}|{$item[3]}' class='$isSetMeal'> {$item[0]} - RM " . number_format($item[2], 2) . "
+                            <img src='{$imagePath}' alt='{$itemName}' onerror=\"this.src='images/placeholder.svg'\"><br>
+                            <input type='checkbox' name='food[]' value='{$itemName}|{$item['price']}|{$item['is_set_meal']}' class='$isSetMeal'> {$itemName} - RM {$itemPrice}
                         </label><br>
                         <label>Spiciness Level:</label>
-                        <select name='spiciness[{$item[0]}]'>
+                        <select name='spiciness[{$itemName}]'>
                             <option value='Mild'>Mild</option>
                             <option value='Medium'>Medium</option>
                             <option value='Spicy'>Spicy</option>
                             <option value='Extra Spicy'>Extra Spicy</option>
                         </select><br>
                         <label>Quantity:</label>
-                        <input type='number' name='food_qty[{$item[0]}]' value='1' min='1'>";
+                        <input type='number' name='food_qty[{$itemName}]' value='1' min='1'>";
 
-                if ($item[3]) {
+                if ($item['is_set_meal']) {
                     echo "<h4>Select a Drink</h4>";
-                    foreach (["Honeydew Latte", "Iced Lemon Tea", "Orange Fizz", "Bali Blue", "Green Java"] as $drink) {
+                    foreach ($drinkItems as $drink) {
+                        $drinkName = htmlspecialchars($drink['name']);
                         echo "<label>
-                                <input type='radio' name='set_drink[{$item[0]}]' value='$drink|0'> $drink
+                                <input type='radio' name='set_drink[{$itemName}]' value='{$drinkName}|0'> {$drinkName}
                               </label><br>";
                     }
                 }
@@ -120,22 +163,18 @@
         <h3>Add-On Drinks (Optional)</h3>
         <div class="drink-grid">
             <?php
-            $drinks = [
-                ["Honeydew Latte", "images/HoneydewLatte.webp", 5.00],
-                ["Iced Lemon Tea", "images/icelemontea.webp", 4.00],
-                ["Orange Fizz", "images/orangefizz.png", 6.00],
-                ["Bali Blue", "images/baliblue.png", 7.00],
-                ["Green Java", "images/greenjava.jpg", 6.50]
-            ];
-
-            foreach ($drinks as $drink) {
+            foreach ($drinkItems as $drink) {
+                $drinkName = htmlspecialchars($drink['name']);
+                $drinkPrice = number_format($drink['price'], 2);
+                $imagePath = htmlspecialchars($drink['image_path']);
+                
                 echo "<div class='drink-item'>
                         <label>
-                            <img src='{$drink[1]}' alt='{$drink[0]}'><br>
-                            <input type='checkbox' name='drink[]' value='{$drink[0]}|{$drink[2]}'> {$drink[0]} - RM " . number_format($drink[2], 2) . "
+                            <img src='{$imagePath}' alt='{$drinkName}' onerror=\"this.src='images/placeholder.svg'\"><br>
+                            <input type='checkbox' name='drink[]' value='{$drinkName}|{$drink['price']}'> {$drinkName} - RM {$drinkPrice}
                         </label><br>
                         <label>Quantity:</label>
-                        <input type='number' name='drink_qty[{$drink[0]}]' value='1' min='1'>
+                        <input type='number' name='drink_qty[{$drinkName}]' value='1' min='1'>
                       </div>";
             }
             ?>
