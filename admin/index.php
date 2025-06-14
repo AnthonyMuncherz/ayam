@@ -162,11 +162,11 @@ $conn->close();
                 <p style="color: #6b7280; margin-top: 0.5rem;">Welcome back! Here's what's happening with your restaurant today.</p>
             </div>
             <div class="header-actions">
-                <a href="orders.php?status=pending" class="btn btn-outline">
+                <a href="manage_orders.php?filter=pending" class="btn btn-outline">
                     <i class="fas fa-clock"></i>
                     Pending Orders
                 </a>
-                <a href="orders.php?action=new" class="btn btn-primary">
+                <a href="manage_orders.php" class="btn btn-primary">
                     <i class="fas fa-plus"></i>
                     New Order
                 </a>

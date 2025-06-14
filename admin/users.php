@@ -531,7 +531,7 @@ $users_result = $users_stmt->get_result();
                 </a>
             </div>
             <div class="nav-item">
-                <a href="orders.php" class="nav-link">
+                <a href="manage_orders.php" class="nav-link">
                     <i class="fas fa-shopping-cart"></i>
                     Manage Orders
                 </a>

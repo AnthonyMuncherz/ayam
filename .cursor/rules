@@ -122,11 +122,20 @@
 
 4. **admin/manage_orders.php** - Order management system
    - **Completely redesigned** with unified styling
+   - **URL Parameter Filtering**: Supports ?filter=pending for direct navigation
+   - **Detailed Order View**: Comprehensive order details modal with:
+     - Complete order information (ID, date, status, payment method)
+     - Customer details (name, email, phone, delivery address)
+     - Order items with quantities, prices, and spiciness levels
+     - Pricing breakdown (subtotal, delivery fee, total)
+     - Order timeline showing status progression
+     - Professional responsive design with loading states
    - Order statistics with RM currency
    - Advanced filtering (status, type, search)
    - Status management with visual indicators
    - Customer information display
    - Auto-refresh functionality
+   - **Fixed**: Dashboard "Pending Orders" button now works correctly
 
 5. **admin/manage_menu.php** - Menu management system
    - **Completely redesigned** with unified styling
