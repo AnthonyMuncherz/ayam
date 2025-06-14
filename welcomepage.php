@@ -81,7 +81,7 @@
     <div class="container">
         <div class="center-text">
             <h1>Real Taste of Ayam Gepuk</h1>
-            <p>Authentic Indonesian flavor, right at your fingertips.</p>
+            <p>Authentic Malaysian flavor, right at your fingertips.</p>
         </div>
     </div>
 

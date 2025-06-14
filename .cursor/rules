@@ -1,0 +1,245 @@
+# Ayam Gepuk Restaurant Project - Cursor Rules & Memory Bank
+
+## Project Overview
+- **Project Name**: Ayam Gepuk Restaurant Website
+- **Technology Stack**: PHP, MySQL, HTML5, CSS3, JavaScript
+- **Database**: ayam_gepuk (MySQL)
+- **Server Environment**: XAMPP (Apache, PHP, MySQL)
+- **Theme**: Malaysian restaurant specializing in smashed chicken (Ayam Gepuk)
+- **Currency**: Malaysian Ringgit (RM) with 2 decimal places
+- **Location**: Kuala Lumpur, Malaysia
+
+## Recent Updates (Latest Session)
+### Currency & Context Changes
+- **Currency**: Changed from Indonesian Rupiah (Rp) to Malaysian Ringgit (RM)
+- **Number Format**: Updated to Malaysian format (2 decimal places: RM 25.50)
+- **Location**: Changed from Jakarta, Indonesia to Kuala Lumpur, Malaysia
+- **Phone**: Updated to Malaysian format (+60 3-2141-8200)
+- **Country Code**: Changed from "ID" to "MY"
+- **Context**: All Indonesian references changed to Malaysian
+
+### Admin Dashboard Redesign
+- **Unified CSS**: Created `admin/admin_styles.css` for consistent styling across all admin pages
+- **Design System**: Implemented professional, modern design with:
+  - Consistent color scheme (primary: #f5c542, secondary: #1f2937)
+  - Unified typography using Inter font
+  - Responsive grid layouts
+  - Professional sidebar navigation
+  - Consistent button styles and interactions
+  - Modern card layouts with hover effects
+  - Professional table styling
+  - Modal dialogs with animations
+
+### Updated Admin Pages
+1. **admin/index.php** - Main dashboard
+   - Uses unified CSS
+   - Real-time statistics with RM currency
+   - Auto-refresh functionality
+   - Professional card layouts
+
+2. **admin/manage_users.php** - User management
+   - Complete redesign with unified styling
+   - User statistics cards
+   - Search functionality
+   - Role management with visual badges
+   - Delete user functionality (with protection for self)
+
+3. **admin/manage_orders.php** - Order management
+   - Professional redesign
+   - Order statistics with RM currency
+   - Advanced filtering (status, type, search)
+   - Status management with visual indicators
+   - Auto-refresh functionality
+
+4. **admin/manage_menu.php** - Menu management
+   - Complete redesign with image previews
+   - Menu statistics (food/drink items, set meals, avg price)
+   - Advanced filtering and search
+   - Modal-based add/edit forms
+   - Visual type and set meal badges
+
+## Key Files Created/Modified
+1. **index.php** - Main homepage with modern design, security headers, session management
+   - Features: Hero section, responsive design, SEO optimization, accessibility
+   - Security: CSRF protection, XSS prevention, secure headers
+   - Integrations: Schema.org markup, Open Graph tags
+   - **Updated**: Malaysian context, RM currency, Kuala Lumpur address
+
+2. **admin/admin_styles.css** - Unified admin styling
+   - Professional design system
+   - Responsive layouts
+   - Consistent components (buttons, cards, tables, modals)
+   - Modern color scheme and typography
+
+## Database Structure
+- Database: `ayam_gepuk`
+- Connection files: `db_connection.php`, `db.php`
+- Main tables: users, orders, menu_items, order_items, outlets, restaurants
+
+### Users Table (Updated)
+- Added `role` column: ENUM('customer', 'admin', 'staff') DEFAULT 'customer'
+- Default admin user created: username 'admin' with admin role
+- Role-based access control implemented
+
+### Security Tables
+- `login_attempts` - Rate limiting for admin login
+- `admin_logs` - Activity logging and audit trail
+
+## Admin System Features
+### Complete Admin Dashboard (/admin/)
+1. **admin/index.php** - Main admin dashboard
+   - Real-time statistics (users, orders, revenue in RM)
+   - Recent orders display with RM currency
+   - Modern responsive sidebar navigation
+   - Role-based authentication
+   - Auto-refresh functionality
+   - **Updated**: Unified design, RM currency
+
+2. **admin/admin_login.php** - Secure admin login
+   - Rate limiting (5 attempts per 15 minutes)
+   - Security logging and audit trail
+   - Role verification (admin only access)
+   - Modern UI with animations
+   - Input validation and sanitization
+
+3. **admin/manage_users.php** - User management system
+   - **Completely redesigned** with unified styling
+   - User statistics cards
+   - Search and filter functionality
+   - Role assignment (customer/staff/admin)
+   - User deletion with self-protection
+   - Professional table layout
+
+4. **admin/manage_orders.php** - Order management system
+   - **Completely redesigned** with unified styling
+   - Order statistics with RM currency
+   - Advanced filtering (status, type, search)
+   - Status management with visual indicators
+   - Customer information display
+   - Auto-refresh functionality
+
+5. **admin/manage_menu.php** - Menu management system
+   - **Completely redesigned** with unified styling
+   - Menu statistics (food/drink items, set meals, average price in RM)
+   - Image preview functionality
+   - Advanced search and filtering
+   - Modal-based CRUD operations
+   - Visual type and set meal indicators
+
+6. **admin/logout.php** - Secure logout with session destruction and activity logging
+
+## Security Implementation
+- Rate limiting on login attempts
+- Comprehensive activity logging in admin_logs table
+- Role-based access control throughout
+- Secure session management with proper cookie configuration
+- SQL injection protection via prepared statements
+- XSS prevention with input sanitization
+- CSRF protection
+
+## Design System
+### Colors
+- Primary: #f5c542 (Golden yellow)
+- Secondary: #1f2937 (Dark gray)
+- Success: #10b981 (Green)
+- Error: #dc2626 (Red)
+- Warning: #d97706 (Orange)
+- Info: #3b82f6 (Blue)
+
+### Typography
+- Font Family: Inter (Google Fonts)
+- Weights: 300, 400, 500, 600, 700
+
+### Components
+- Unified button styles with hover effects
+- Professional card layouts
+- Responsive grid systems
+- Modern table styling
+- Modal dialogs with animations
+- Status badges and indicators
+- Professional sidebar navigation
+
+## Access Details
+- Admin login: `/admin/admin_login.php`
+- Default credentials: username 'admin', password 'password'
+- Role-based automatic redirects implemented
+- Currency: Malaysian Ringgit (RM) throughout the system
+- Location: Kuala Lumpur, Malaysia
+
+## Development Notes
+- All admin pages now use unified CSS for consistency
+- Currency formatting updated to Malaysian standard (2 decimal places)
+- Professional design system implemented across all admin interfaces
+- Responsive design ensures mobile compatibility
+- Security features maintained throughout redesign
+
+## Existing Files Structure
+- **welcomepage.php** - User welcome/dashboard page
+- **login.php** - User login system
+- **register.php** - User registration
+- **menu.php** - Menu display page
+- **cart.php** - Shopping cart functionality
+- **order.php** - Order placement system
+- **db_connection.php** - Database connection handler
+
+## Admin Navigation Structure
+```
+Admin Panel
+├── Dashboard (index.php) - Statistics and overview
+├── Manage Users (manage_users.php) - User management and roles
+├── Manage Orders (manage_orders.php) - Order tracking and status updates
+├── Manage Menu (manage_menu.php) - Menu management
+├── View Site - Link to main website
+└── Logout - Secure session termination
+```
+
+## Database Schema Updates Made
+1. Added `role` column to `users` table
+2. Created `login_attempts` table for security
+3. Created `admin_logs` table for audit trail
+4. Set up proper indexes for performance
+
+## Security Best Practices Implemented
+- Prepared statements for all database queries
+- Input validation and sanitization
+- Secure session configuration
+- Rate limiting on sensitive operations
+- Activity logging for admin actions
+- Role-based access control
+- Secure password handling
+- HTTPS-ready configuration
+
+## Next Steps for Enhancement
+- Add menu management functionality
+- Implement reporting and analytics
+- Add email notifications for orders
+- Create backup and restore functionality
+- Add multi-outlet support
+- Implement inventory management
+
+## Usage Instructions
+1. **Admin Access**: Navigate to `/admin/admin_login.php`
+2. **Default Admin**: username: 'admin', password: 'password' (change immediately)
+3. **User Management**: Assign roles through admin panel
+4. **Order Management**: Track and update order statuses in real-time
+
+## Important Notes
+- All existing authentication flows preserved
+- Index page redirects logged-in users to deliverypickup.php
+- Images referenced: logo.png, welcome.jpg, ayamgepuk.jpg
+- Color scheme: #f5c542 (gold), gradients for modern look
+- Font: Segoe UI system fonts for performance
+
+## MCP Tools Used
+- Context7 for PHP best practices
+- Web search for modern authentication patterns
+- File exploration for understanding existing structure
+
+## Maintenance Guidelines
+- Keep security headers updated
+- Monitor for new vulnerabilities
+- Update meta descriptions and SEO elements
+- Test cross-browser compatibility
+- Monitor Core Web Vitals
+
+Last Updated: $(date) 
