@@ -70,6 +70,16 @@
    - Responsive layouts
    - Consistent components (buttons, cards, tables, modals)
    - Modern color scheme and typography
+   - **Added**: Image upload styling and components
+
+3. **images/uploads/** - Directory for uploaded menu item images
+   - Secure file storage with proper permissions
+   - Automatic cleanup of old images on updates
+   - Unique filename generation to prevent conflicts
+
+4. **images/placeholder.svg** - Fallback image for error handling
+   - SVG placeholder for broken or missing images
+   - Consistent visual feedback across the system
 
 ## Database Structure
 - Database: `ayam_gepuk`
@@ -120,11 +130,19 @@
 
 5. **admin/manage_menu.php** - Menu management system
    - **Completely redesigned** with unified styling
+   - **Image Uploader Implemented**: Full-featured image upload system
+     - Drag & drop file upload with visual feedback
+     - File validation (JPEG, PNG, GIF, WebP up to 5MB)
+     - Image preview functionality before upload
+     - Secure file handling with unique naming
+     - Automatic old image cleanup on updates
+     - Manual image path option as fallback
+     - Professional upload UI with progress indicators
    - Menu statistics (food/drink items, set meals, average price in RM)
-   - Image preview functionality
    - Advanced search and filtering
-   - Modal-based CRUD operations
+   - Modal-based CRUD operations with image management
    - Visual type and set meal indicators
+   - Placeholder image system for error handling
 
 6. **admin/logout.php** - Secure logout with session destruction and activity logging
 

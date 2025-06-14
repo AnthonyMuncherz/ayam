@@ -22,50 +22,150 @@ if (!$user || $user['role'] !== 'admin') {
 $message = '';
 $message_type = '';
 
+// Function to handle image upload
+function handleImageUpload($file, $old_image_path = null) {
+    $upload_dir = '../images/uploads/';
+    $allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    $max_size = 5 * 1024 * 1024; // 5MB
+    
+    // Check if file was uploaded
+    if (!isset($file) || $file['error'] !== UPLOAD_ERR_OK) {
+        return ['success' => false, 'message' => 'No file uploaded or upload error occurred.'];
+    }
+    
+    // Validate file type
+    $file_type = mime_content_type($file['tmp_name']);
+    if (!in_array($file_type, $allowed_types)) {
+        return ['success' => false, 'message' => 'Invalid file type. Only JPEG, PNG, GIF, and WebP images are allowed.'];
+    }
+    
+    // Validate file size
+    if ($file['size'] > $max_size) {
+        return ['success' => false, 'message' => 'File size too large. Maximum size is 5MB.'];
+    }
+    
+    // Generate unique filename
+    $file_extension = pathinfo($file['name'], PATHINFO_EXTENSION);
+    $filename = 'menu_' . uniqid() . '_' . time() . '.' . $file_extension;
+    $file_path = $upload_dir . $filename;
+    
+    // Create upload directory if it doesn't exist
+    if (!is_dir($upload_dir)) {
+        mkdir($upload_dir, 0755, true);
+    }
+    
+    // Move uploaded file
+    if (move_uploaded_file($file['tmp_name'], $file_path)) {
+        // Delete old image if updating
+        if ($old_image_path && file_exists('../' . $old_image_path) && strpos($old_image_path, 'uploads/') !== false) {
+            unlink('../' . $old_image_path);
+        }
+        
+        return ['success' => true, 'path' => 'images/uploads/' . $filename];
+    } else {
+        return ['success' => false, 'message' => 'Failed to move uploaded file.'];
+    }
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['action'])) {
         if ($_POST['action'] === 'add_item') {
             $name = trim($_POST['name']);
-            $image_path = trim($_POST['image_path']);
             $price = (float)$_POST['price'];
             $type = $_POST['type'];
             $is_set_meal = isset($_POST['is_set_meal']) ? 1 : 0;
             
-            $stmt = $conn->prepare("INSERT INTO menu_items (name, image_path, price, type, is_set_meal) VALUES (?, ?, ?, ?, ?)");
-            $stmt->bind_param("ssdsi", $name, $image_path, $price, $type, $is_set_meal);
-            
-            if ($stmt->execute()) {
-                $message = "Menu item added successfully!";
-                $message_type = 'success';
+            // Handle image upload or manual path
+            $image_path = '';
+            if (isset($_FILES['image_file']) && $_FILES['image_file']['error'] === UPLOAD_ERR_OK) {
+                $upload_result = handleImageUpload($_FILES['image_file']);
+                if ($upload_result['success']) {
+                    $image_path = $upload_result['path'];
+                } else {
+                    $message = $upload_result['message'];
+                    $message_type = 'error';
+                }
+            } elseif (!empty($_POST['image_path'])) {
+                $image_path = trim($_POST['image_path']);
             } else {
-                $message = "Error adding menu item.";
+                $message = "Please upload an image or provide an image path.";
                 $message_type = 'error';
+            }
+            
+            if (empty($message) && !empty($image_path)) {
+                $stmt = $conn->prepare("INSERT INTO menu_items (name, image_path, price, type, is_set_meal) VALUES (?, ?, ?, ?, ?)");
+                $stmt->bind_param("ssdsi", $name, $image_path, $price, $type, $is_set_meal);
+                
+                if ($stmt->execute()) {
+                    $message = "Menu item added successfully!";
+                    $message_type = 'success';
+                } else {
+                    $message = "Error adding menu item.";
+                    $message_type = 'error';
+                }
             }
         } elseif ($_POST['action'] === 'update_item') {
             $id = (int)$_POST['id'];
             $name = trim($_POST['name']);
-            $image_path = trim($_POST['image_path']);
             $price = (float)$_POST['price'];
             $type = $_POST['type'];
             $is_set_meal = isset($_POST['is_set_meal']) ? 1 : 0;
             
-            $stmt = $conn->prepare("UPDATE menu_items SET name = ?, image_path = ?, price = ?, type = ?, is_set_meal = ? WHERE id = ?");
-            $stmt->bind_param("ssdsii", $name, $image_path, $price, $type, $is_set_meal, $id);
+            // Get current image path
+            $stmt = $conn->prepare("SELECT image_path FROM menu_items WHERE id = ?");
+            $stmt->bind_param("i", $id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $current_item = $result->fetch_assoc();
+            $current_image_path = $current_item['image_path'];
             
-            if ($stmt->execute()) {
-                $message = "Menu item updated successfully!";
-                $message_type = 'success';
-            } else {
-                $message = "Error updating menu item.";
-                $message_type = 'error';
+            // Handle image upload or keep existing
+            $image_path = $current_image_path;
+            if (isset($_FILES['edit_image_file']) && $_FILES['edit_image_file']['error'] === UPLOAD_ERR_OK) {
+                $upload_result = handleImageUpload($_FILES['edit_image_file'], $current_image_path);
+                if ($upload_result['success']) {
+                    $image_path = $upload_result['path'];
+                } else {
+                    $message = $upload_result['message'];
+                    $message_type = 'error';
+                }
+            } elseif (!empty($_POST['image_path']) && $_POST['image_path'] !== $current_image_path) {
+                $image_path = trim($_POST['image_path']);
+            }
+            
+            if (empty($message)) {
+                $stmt = $conn->prepare("UPDATE menu_items SET name = ?, image_path = ?, price = ?, type = ?, is_set_meal = ? WHERE id = ?");
+                $stmt->bind_param("ssdsii", $name, $image_path, $price, $type, $is_set_meal, $id);
+                
+                if ($stmt->execute()) {
+                    $message = "Menu item updated successfully!";
+                    $message_type = 'success';
+                } else {
+                    $message = "Error updating menu item.";
+                    $message_type = 'error';
+                }
             }
         } elseif ($_POST['action'] === 'delete_item') {
             $id = (int)$_POST['id'];
+            
+            // Get image path before deleting
+            $stmt = $conn->prepare("SELECT image_path FROM menu_items WHERE id = ?");
+            $stmt->bind_param("i", $id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $item = $result->fetch_assoc();
             
             $stmt = $conn->prepare("DELETE FROM menu_items WHERE id = ?");
             $stmt->bind_param("i", $id);
             
             if ($stmt->execute()) {
+                // Delete uploaded image file if it exists
+                if ($item && strpos($item['image_path'], 'uploads/') !== false) {
+                    $file_path = '../' . $item['image_path'];
+                    if (file_exists($file_path)) {
+                        unlink($file_path);
+                    }
+                }
                 $message = "Menu item deleted successfully!";
                 $message_type = 'success';
             } else {
@@ -137,6 +237,93 @@ $menu_items = $conn->query("SELECT * FROM menu_items ORDER BY type, name");
         .type-drink {
             background: #dbeafe;
             color: #2563eb;
+        }
+        
+        /* Image Upload Styles */
+        .image-upload-container {
+            border: 2px dashed #d1d5db;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            text-align: center;
+            background: #f9fafb;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .image-upload-container:hover {
+            border-color: #f5c542;
+            background: #fffbeb;
+        }
+        
+        .image-upload-container.dragover {
+            border-color: #f5c542;
+            background: #fffbeb;
+            transform: scale(1.02);
+        }
+        
+        .upload-icon {
+            font-size: 2rem;
+            color: #9ca3af;
+            margin-bottom: 0.5rem;
+        }
+        
+        .upload-text {
+            color: #6b7280;
+            margin-bottom: 0.5rem;
+        }
+        
+        .upload-hint {
+            font-size: 0.75rem;
+            color: #9ca3af;
+        }
+        
+        .image-preview {
+            max-width: 200px;
+            max-height: 150px;
+            border-radius: 0.5rem;
+            margin: 1rem auto;
+            display: block;
+            border: 2px solid #e5e7eb;
+        }
+        
+        .image-upload-input {
+            display: none;
+        }
+        
+        .current-image {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        
+        .current-image img {
+            max-width: 150px;
+            max-height: 100px;
+            border-radius: 0.5rem;
+            border: 2px solid #e5e7eb;
+        }
+        
+        .image-actions {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            margin-top: 0.5rem;
+        }
+        
+        .btn-upload {
+            background: #f5c542;
+            color: #1f2937;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-upload:hover {
+            background: #f59e0b;
+            transform: translateY(-1px);
         }
     </style>
 </head>
@@ -329,7 +516,7 @@ $menu_items = $conn->query("SELECT * FROM menu_items ORDER BY type, name");
                                 <img src="../<?php echo htmlspecialchars($item['image_path']); ?>" 
                                      alt="<?php echo htmlspecialchars($item['name']); ?>" 
                                      class="menu-item-image"
-                                     onerror="this.src='../images/placeholder.jpg'">
+                                     onerror="this.src='../images/placeholder.svg'">
                             </td>
                             <td>
                                 <strong><?php echo htmlspecialchars($item['name']); ?></strong>
@@ -385,7 +572,7 @@ $menu_items = $conn->query("SELECT * FROM menu_items ORDER BY type, name");
                 <h3>Add New Menu Item</h3>
                 <button class="close" onclick="closeModal('addModal')">&times;</button>
             </div>
-            <form method="POST">
+            <form method="POST" enctype="multipart/form-data">
                 <input type="hidden" name="action" value="add_item">
                 
                 <div class="form-group">
@@ -394,8 +581,30 @@ $menu_items = $conn->query("SELECT * FROM menu_items ORDER BY type, name");
                 </div>
                 
                 <div class="form-group">
-                    <label class="form-label" for="image_path">Image Path:</label>
-                    <input type="text" id="image_path" name="image_path" class="form-input" placeholder="images/item.jpg" required>
+                    <label class="form-label">Image:</label>
+                    <div class="image-upload-container" onclick="document.getElementById('image_file').click()" 
+                         ondrop="handleDrop(event, 'image_file')" 
+                         ondragover="handleDragOver(event)" 
+                         ondragleave="handleDragLeave(event)">
+                        <input type="file" id="image_file" name="image_file" class="image-upload-input" 
+                               accept="image/*" onchange="previewImage(this, 'add_preview')">
+                        <div class="upload-icon">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                        <div class="upload-text">Click to upload or drag and drop</div>
+                        <div class="upload-hint">PNG, JPG, GIF, WebP up to 5MB</div>
+                    </div>
+                    <img id="add_preview" class="image-preview" style="display: none;">
+                    
+                    <div style="margin-top: 1rem; text-align: center;">
+                        <strong>OR</strong>
+                    </div>
+                    
+                    <div style="margin-top: 0.5rem;">
+                        <label class="form-label" for="image_path">Manual Image Path:</label>
+                        <input type="text" id="image_path" name="image_path" class="form-input" 
+                               placeholder="images/item.jpg (optional if uploading file)">
+                    </div>
                 </div>
                 
                 <div class="form-group">
@@ -433,7 +642,7 @@ $menu_items = $conn->query("SELECT * FROM menu_items ORDER BY type, name");
                 <h3>Edit Menu Item</h3>
                 <button class="close" onclick="closeModal('editModal')">&times;</button>
             </div>
-            <form method="POST">
+            <form method="POST" enctype="multipart/form-data">
                 <input type="hidden" name="action" value="update_item">
                 <input type="hidden" id="edit_id" name="id">
                 
@@ -443,8 +652,40 @@ $menu_items = $conn->query("SELECT * FROM menu_items ORDER BY type, name");
                 </div>
                 
                 <div class="form-group">
-                    <label class="form-label" for="edit_image_path">Image Path:</label>
-                    <input type="text" id="edit_image_path" name="image_path" class="form-input" required>
+                    <label class="form-label">Current Image:</label>
+                    <div id="current_image_container" class="current-image">
+                        <img id="current_image" src="" alt="Current image">
+                        <div class="image-actions">
+                            <button type="button" class="btn-upload" onclick="document.getElementById('edit_image_file').click()">
+                                <i class="fas fa-upload"></i> Replace Image
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="image-upload-container" onclick="document.getElementById('edit_image_file').click()" 
+                         ondrop="handleDrop(event, 'edit_image_file')" 
+                         ondragover="handleDragOver(event)" 
+                         ondragleave="handleDragLeave(event)" 
+                         style="display: none;" id="edit_upload_container">
+                        <input type="file" id="edit_image_file" name="edit_image_file" class="image-upload-input" 
+                               accept="image/*" onchange="previewImage(this, 'edit_preview')">
+                        <div class="upload-icon">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                        <div class="upload-text">Click to upload or drag and drop</div>
+                        <div class="upload-hint">PNG, JPG, GIF, WebP up to 5MB</div>
+                    </div>
+                    <img id="edit_preview" class="image-preview" style="display: none;">
+                    
+                    <div style="margin-top: 1rem; text-align: center;">
+                        <strong>OR</strong>
+                    </div>
+                    
+                    <div style="margin-top: 0.5rem;">
+                        <label class="form-label" for="edit_image_path">Manual Image Path:</label>
+                        <input type="text" id="edit_image_path" name="image_path" class="form-input" 
+                               placeholder="images/item.jpg">
+                    </div>
                 </div>
                 
                 <div class="form-group">
@@ -519,6 +760,18 @@ $menu_items = $conn->query("SELECT * FROM menu_items ORDER BY type, name");
             document.getElementById('edit_price').value = item.price;
             document.getElementById('edit_type').value = item.type;
             document.getElementById('edit_is_set_meal').checked = item.is_set_meal == 1;
+            
+            // Show current image
+            const currentImage = document.getElementById('current_image');
+            currentImage.src = '../' + item.image_path;
+            currentImage.onerror = function() {
+                this.src = '../images/placeholder.svg';
+            };
+            
+            // Reset upload preview
+            document.getElementById('edit_preview').style.display = 'none';
+            document.getElementById('edit_image_file').value = '';
+            
             document.getElementById('editModal').style.display = 'block';
         }
 
@@ -526,15 +779,90 @@ $menu_items = $conn->query("SELECT * FROM menu_items ORDER BY type, name");
             document.getElementById(modalId).style.display = 'none';
         }
 
+        // Image upload functions
+        function previewImage(input, previewId) {
+            const file = input.files[0];
+            const preview = document.getElementById(previewId);
+            
+            if (file) {
+                // Validate file type
+                const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+                if (!allowedTypes.includes(file.type)) {
+                    alert('Invalid file type. Please select a JPEG, PNG, GIF, or WebP image.');
+                    input.value = '';
+                    preview.style.display = 'none';
+                    return;
+                }
+                
+                // Validate file size (5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('File size too large. Please select an image smaller than 5MB.');
+                    input.value = '';
+                    preview.style.display = 'none';
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                preview.style.display = 'none';
+            }
+        }
+        
+        function handleDragOver(event) {
+            event.preventDefault();
+            event.currentTarget.classList.add('dragover');
+        }
+        
+        function handleDragLeave(event) {
+            event.preventDefault();
+            event.currentTarget.classList.remove('dragover');
+        }
+        
+        function handleDrop(event, inputId) {
+            event.preventDefault();
+            event.currentTarget.classList.remove('dragover');
+            
+            const files = event.dataTransfer.files;
+            if (files.length > 0) {
+                const input = document.getElementById(inputId);
+                input.files = files;
+                
+                // Trigger preview
+                const previewId = inputId === 'image_file' ? 'add_preview' : 'edit_preview';
+                previewImage(input, previewId);
+            }
+        }
+        
+        // Reset forms when modals are closed
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+            
+            if (modalId === 'addModal') {
+                // Reset add form
+                document.getElementById('image_file').value = '';
+                document.getElementById('add_preview').style.display = 'none';
+                document.querySelector('#addModal form').reset();
+            } else if (modalId === 'editModal') {
+                // Reset edit form previews
+                document.getElementById('edit_image_file').value = '';
+                document.getElementById('edit_preview').style.display = 'none';
+            }
+        }
+        
         // Close modal when clicking outside
         window.onclick = function(event) {
             const addModal = document.getElementById('addModal');
             const editModal = document.getElementById('editModal');
             if (event.target === addModal) {
-                addModal.style.display = 'none';
+                closeModal('addModal');
             }
             if (event.target === editModal) {
-                editModal.style.display = 'none';
+                closeModal('editModal');
             }
         }
     </script>
